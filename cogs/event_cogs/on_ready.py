@@ -12,7 +12,7 @@ class OnReady(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        presences_cycle = cycle(presences + [current_language['help_footer']])
+        presences_cycle = cycle(presences)
         print(f"{self.bot.user} aka {self.bot.user.name} has connected to Discord!")
         invite_link = discord.utils.oauth_url(
             self.bot.user.id,
@@ -20,6 +20,7 @@ class OnReady(commands.Cog):
             scopes=("bot", "applications.commands")
         )
         print(f"Invite link: {invite_link}")
+        print(f"Bot is online.")
         if presences_disabled:
             return
         while True:
