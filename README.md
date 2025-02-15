@@ -145,7 +145,7 @@ sudo docker-compose up --build
 ## This entire bot was built by [MishalHossin](https://github.com/mishalhossin/Discord-AI-Chatbot/) and I take no credit for its creation.
 Certain parts of their code were modified to create this bot in its present form. 
 ### Main differences:
-- Mishal's bot uses Mistral AI, this one uses Llama
+- Updated bot to stop using Asynchronus DuckDuckGoSearch as this is not compat with current versions of OpenAI tools (now uses DDGS instead of AsyncDDGS)
 - Serious error handling fixes and adjustments that are borne not out of Mishal's code, but out of the fact that his bot was created in older versions of python
 - trump.txt is my own creation
 
