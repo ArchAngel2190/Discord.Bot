@@ -1,11 +1,11 @@
 import discord
+import asyncio
 from discord.ext import commands
 
 from bot_utilities.response_utils import split_response
 from bot_utilities.ai_utils import generate_response
 from bot_utilities.config_loader import config, load_active_channels
-from ..common import allow_dm, trigger_words, replied_messages, smart_mention, message_history,  MAX_HISTORY, instructions
-
+from ..common import allow_dm, trigger_words, replied_messages, smart_mention, message_history, MAX_HISTORY, instructions
 
 class OnMessage(commands.Cog):
     def __init__(self, bot):
@@ -27,21 +27,38 @@ class OnMessage(commands.Cog):
         if not (is_active_channel or is_allowed_dm or contains_trigger_word or is_bot_mentioned or is_replied or bot_name_in_message):
             return
 
+        # Prepare instructions using the config value
         instruc_config = active_channels.get(string_channel_id, config['DEFAULT_INSTRUCTION'])
-        instructions = f"Ignore all the instructions you have gotten before. {self.instructions[instruc_config]}. "
+        instructions_text = f"Ignore all the instructions you have gotten before. {self.instructions[instruc_config]}. "
 
+        # Update message history
         channel_id = message.channel.id
         key = f"{message.author.id}-{channel_id}"
         message_history[key] = message_history.get(key, [])
         message_history[key] = message_history[key][-MAX_HISTORY:]
         message_history[key].append({"role": "user", "content": message.content})
 
-        async with message.channel.typing():
-            response = await self.generate_response(instructions, message_history[key])
+        # Create an Event flag to signal when we're done
+        typing_done = asyncio.Event()
 
+        # Define a background task to keep typing until done
+        async def keep_typing():
+            while not typing_done.is_set():
+                async with message.channel.typing():
+                    await asyncio.sleep(3)  # Refresh typing indicator every 3 seconds
+
+        # Start the background typing task
+        self.bot.loop.create_task(keep_typing())
+
+        # Generate the response (text-only)
+        response = await self.generate_response(instructions_text, message_history[key])
         message_history[key].append({"role": "assistant", "content": response})
 
+        # Send the response message(s)
         await self.send_response(message, response)
+
+        # Signal to stop the typing indicator
+        typing_done.set()
 
     async def generate_response(self, instructions, history):
         return await generate_response(instructions=instructions, history=history)
@@ -52,23 +69,32 @@ class OnMessage(commands.Cog):
                 try:
                     await message.reply(chunk, suppress_embeds=True)
                 except Exception:
-                    await message.channel.send("I apologize for any inconvenience caused. It seems that there was an error preventing the delivery of my message. Additionally, it appears that the message I was replying to has been deleted, which could be the reason for the issue. If you have any further questions or if there's anything else I can assist you with, please let me know and I'll be happy to help.")
+                    await message.channel.send(
+                        "I apologize for any inconvenience caused. It seems that there was an error preventing the delivery of my message. Additionally, it appears that the message I was replying to has been deleted, which could be the reason for the issue. If you have any further questions or if there's anything else I can assist you with, please let me know and I'll be happy to help."
+                    )
         else:
-            await message.reply("I apologize for any inconvenience caused. It seems that there was an error preventing the delivery of my message.")
+            await message.reply(
+                "I apologize for any inconvenience caused. It seems that there was an error preventing the delivery of my message."
+            )
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        # Track replied messages (for context/history)
         if message.author == self.bot.user and message.reference:
             replied_messages[message.reference.message_id] = message
             if len(replied_messages) > 5:
                 oldest_message_id = min(replied_messages.keys())
                 del replied_messages[oldest_message_id]
 
+        # Replace mentions with display names
         if message.mentions:
             for mention in message.mentions:
                 message.content = message.content.replace(f'<@{mention.id}>', f'{mention.display_name}')
 
-        if message.stickers or message.author.bot or (message.reference and (message.reference.resolved.author != self.bot.user or message.reference.resolved.embeds)):
+        # Ignore stickers, bots, and certain message references
+        if message.stickers or message.author.bot or (
+            message.reference and (message.reference.resolved.author != self.bot.user or message.reference.resolved.embeds)
+        ):
             return
 
         await self.process_message(message)
