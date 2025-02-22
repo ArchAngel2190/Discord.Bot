@@ -51,8 +51,8 @@ To create a custom personality, follow these steps:
 Follow this guide in its entirety. Or don't, I'm not your real dad.
 
 ## Prerequisites:
-[x] This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste.
-[x] This bot runs on **Python <3.13.** If you try to run this bot on Python 3.13, *it will fail and you will be confused.* This bot MUST use Python 3.12 or older. Use venv or pipx to install older python versions and make sure that to run the bot you use **python3.12 main.py** and not **python main.py.**
+- This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste.
+- This bot runs on **Python <3.13.** If you try to run this bot on Python 3.13, *it will fail and you will be confused.* This bot MUST use Python 3.12 or older. Use venv or pipx to install older python versions and make sure that to run the bot you use **python3.12 main.py** and not **python main.py.**
 
 ## Installation guide:
 
