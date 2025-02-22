@@ -57,26 +57,27 @@ To create a custom personality, follow these steps:
 Follow this guide in its entirety. Or don't, I'm not your real dad.
 
 ## Prerequisites:
-This bot runs on **Python <3.13.** If you try to run this bot on Python 3.13, *it will fail and you will be confused.* This bot MUST use Python 3.12 or older. Use venv or pipx to install older python versions and make sure that to run the bot you use **python3.12 main.py** and not **python main.py.**
+[x] This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste.
+[x] This bot runs on **Python <3.13.** If you try to run this bot on Python 3.13, *it will fail and you will be confused.* This bot MUST use Python 3.12 or older. Use venv or pipx to install older python versions and make sure that to run the bot you use **python3.12 main.py** and not **python main.py.**
 
 ## Installation guide:
 
 ### Step 1. Git clone repository
 ```
-git clone https://github.com/ArchAngel2190/TrumpBot/
+git clone https://github.com/ArchAngel2190/Discord.Bot/
 ```
-### Step 2. Changing directory to cloned directory
+### Step 2. Change directory to cloned directory (if on Linux)
 ```
-cd TrumpBot
+cd Discord.Bot
 ```
 ### Step 3. Install requirements
+Ensure that if have Python 3.13 or newer installed that you are operating in a virtual environment (`venv` or `pipx`) with Python 3.12 or older.
 ```
-python3.10 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
-### Step 4. Getting discord bot token and enabling intents from [HERE](https://discord.com/developers/applications)
+### Step 4. Get your Discord bot token and **enable intents** from [HERE](https://discord.com/developers/applications)
 
-<details>
-<summary><strong>Read more...  ⚠️  (Click to expand)</strong></summary>
+<summary><strong>Read more...  ⚠️</strong></summary>
 
 ##### Select the correct application from your Discord Developer dashboard
 
@@ -88,34 +89,36 @@ The intents the bot needs are Presence, Server Members, and Message Content. The
 
 ### Step 5. [Create a Groq account](https://console.groq.com/login)
 ### Step 6. [Get Groq api key](https://console.groq.com/keys)
-### Step 7. Open `.env` and put in the Discord bot token and your Groq key. 
-Keep in mind that if you are on Linux, `.env` will be hidden by default and must be opened by navigating to `/.env` or checking "Show hidden files" in your file manger.  
+### Step 7. Open `remove_this_prefix.env` and put in the Discord bot token and your Groq key.
+### Step 8. Remove the  prefix from `remove_this_prefix.env` so the file is titled `.env`. If you are on Linux, this will cause the file to be hidden in a file manager, so know how to find it first if you're not using the CLI like a Chad.
 
 When properly filled out, `.env` will look like this:
 ```
 DISCORD_TOKEN=DISCORD_TOKEN_HERE
 API_KEY=GROQ_TOKEN_HERE
 ```
-### Step 7. 🚀 Run the bot with
+### Step 9. Make your instructions file.
+Go to `Discord.Bot/Instructions` and create a text file that describes how you want the bot to act. Use the files inside as an example but you can do whatever you want here. This is great for making characters.
+
+### Step 10. 🚀 Run the bot with
 ```
-python3.12 main.py
+python main.py
 ```
-Ensure you use whatever Python version you have installed. If you are using venv, you may not need the `python3.12` command and `python` may work.
+Ensure you use whatever Python version you have installed. If you are not using a virtual environment for older Python, you might have to use the command `pythonx.xx` in place of `python` where `x.xx` is your Python version.
 
 #### You may need to run as admin if you are on Windows (but you shouldn't be - why do that to yourself?)
-### Step 8. 🔗 Invite the bot 
-You can Invite your bot using the link in console, or by creating an invite link in Discord Developer's console and giving it the permissions "Bot" and subsequently "Send messages"
+### Step 11. 🔗 Invite the bot 
+You can Invite your bot using the link in console, or by creating an invite link in Discord Developer's console. Inviting from the generated link allows you to use the bot without its own role.
 ![image](https://user-images.githubusercontent.com/91066601/236673317-64a1789c-f6b1-48d7-ba1b-dbb18e7d802a.png)
 
 #### There are 2 ways to talk to the AI
 - Invite your bot and DM (Direct Message) it | ⚠️ Make sure you have DM enabled
 - If you want it in the server channel, use **/toggleactive** 
-- For more awesome commands, use **/help**
 
 ### Using docker to run 🐳 (useful for hosting)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 - Have a working bot token
-- Follow up to step 4
+- Follow up to step 9
 #### Install docker-compose on a Linux machine:
 For Debian-based distributions (such as Ubuntu):
 ```
@@ -146,8 +149,7 @@ sudo docker-compose up --build
 Certain parts of their code were modified to create this bot in its present form. 
 ### Main differences:
 - Updated bot to stop using Asynchronus DuckDuckGoSearch as this is not compat with current versions of OpenAI tools (now uses DDGS instead of AsyncDDGS)
-- Serious error handling fixes and adjustments that are borne not out of Mishal's code, but out of the fact that his bot was created in older versions of python
-- trump.txt is my own creation
+- Serious error handling fixes and adjustments that are borne not out of Mishal's code, but out of the fact that his bot was created in older versions of Python
 
 ### Original contributors to Mishal Hossin's bot: 
 
