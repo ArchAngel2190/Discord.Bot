@@ -2,6 +2,11 @@
 #### Your Discord AI Companion!
 Originally made by [MishalHossin](https://github.com/mishalhossin/Discord-AI-Chatbot/) and all credit for this excellent code goes to them.
 
+Designed With Linux In Mind!
+
+<img src="https://github.com/user-attachments/assets/e5008005-c8aa-4136-b856-aeab2529be44" alt="Tux" width="75"/>
+
+
 ## Features and commands 🌟
 
 <summary><strong>Features</strong></summary>
@@ -48,10 +53,10 @@ To create a custom personality, follow these steps:
 ⚠️ You don't explicitly need to use the name `yourfile` for persona name and set it in `config.yml`, name it whatever you want.
 
 # Installation
-Follow this guide in its entirety. Or don't, I'm not your real dad.
+Follow this guide in its entirety. Or don't, I'm not your real dad. If you run into problems, use the internet or ChatGPT - they are your friends and ChatGPT is actually surprisingly good at interpreting code errors if you don't know how.
 
 ## Prerequisites:
-- This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste.
+- This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste all the below commands.
 - This bot runs on **Python <3.13.** If you try to run this bot on Python 3.13, *it will fail and you will be confused.* This bot MUST use Python 3.12 or older. Use venv or pipx to install older python versions and make sure that to run the bot you use **python3.12 main.py** and not **python main.py.**
 
 ## Installation guide:
