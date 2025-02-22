@@ -14,12 +14,6 @@ Originally made by [MishalHossin](https://github.com/mishalhossin/Discord-AI-Cha
  - [x] Secure Credential Management: Protect your credentials with environment variables.
  - [x] Web Access: Internet-enabled LLM to allow for current awareness.
 
-<summary><strong>Commands</strong></summary>
-
-- [x] `/help`: Get all commands
-
-Too lazy to list all of em here
-
 
 ## Additional configurations ⚙️
 
