@@ -47,8 +47,14 @@ class OnMessage(commands.Cog):
                 async with message.channel.typing():
                     await asyncio.sleep(3)  # Refresh typing indicator every 3 seconds
 
+        # Stop typing automatically in case of error
+        async def auto_stop_typing():
+            await asyncio.sleep(10)
+            typing_done.set()
+
         # Start the background typing task
         self.bot.loop.create_task(keep_typing())
+        self.bot.loop.create_task(auto_stop_typing())
 
         # Generate the response (text-only)
         response = await self.generate_response(instructions_text, message_history[key])
