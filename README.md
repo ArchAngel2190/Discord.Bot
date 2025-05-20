@@ -18,6 +18,7 @@ Designed With Linux In Mind!
  - [x] Channel-Specific Responses: Use the /toggleactive command to disable the bot in specific channels.
  - [x] Secure Credential Management: Protect your credentials with environment variables.
  - [x] Web Access: Internet-enabled LLM to allow for current awareness.
+ - [x] NEW! Voice-Enabled: The bot will check to see if the author is in a voice channel. If they are, the bot will attempt to join and speak the text using ElevenLabs API. (An ElevenLabs subscription is required for this.)
 
 
 ## Additional configurations ⚙️
@@ -27,12 +28,12 @@ Designed With Linux In Mind!
 
 To select a Language, set the value of `"LANGUAGE"` of `config.yml` with the valid Language Codes listed below:
 
-- `tr` - Türkçe 🇹🇷  
 - `en` - English 🇺🇸
+- `de` - Deutsch 🇩🇪 
+- `tr` - Türkçe 🇹🇷  
 - `ar` - Arabic 🇦🇪
 - `fr` - Français 🇫🇷
-- `es` - Español 🇪🇸
-- `de` - Deutsch 🇩🇪  
+- `es` - Español 🇪🇸 
 - `vn` - Vietnamese 🇻🇳
 - `cn` - Chinese 🇨🇳
 - `ru` - Russian 🇷🇺
@@ -76,8 +77,6 @@ python3 -m pip install -r requirements.txt
 ```
 ### Step 4. Get your Discord bot token and **enable intents** from [HERE](https://discord.com/developers/applications)
 
-<summary><strong>Read more...  ⚠️</strong></summary>
-
 ##### Select the correct application from your Discord Developer dashboard
 
 ##### Enable intents
@@ -95,6 +94,8 @@ When properly filled out, `.env` will look like this:
 ```
 DISCORD_TOKEN=DISCORD_TOKEN_HERE
 API_KEY=GROQ_TOKEN_HERE
+ELEVENLABS_API_KEY=ELEVENLABS_TOKEN_HERE
+ELEVENLABS_VOICE_ID=VOICE_ID_HERE
 ```
 ### Step 9. Make your instructions file.
 Go to `Discord.Bot/Instructions` and create a text file that describes how you want the bot to act. Use the files inside as an example but you can do whatever you want here. This is great for making characters.
@@ -149,6 +150,8 @@ Certain parts of their code were modified to create this bot in its present form
 ### Main differences:
 - Updated bot to stop using Asynchronus DuckDuckGoSearch as this is not compat with current versions of OpenAI tools (now uses DDGS instead of AsyncDDGS)
 - Serious error handling fixes and adjustments that are borne not out of Mishal's code, but out of the fact that his bot was created in older versions of Python
+- Updated commands to work again using slash commands (discord no longer supports ctx commands like !)
+- Added voice function that *actually works* using ElevenLabs. This also allows you to clone voices and use them to bring your bot to life!
 
 ### Original contributors to Mishal Hossin's bot: 
 

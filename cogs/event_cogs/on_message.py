@@ -1,11 +1,23 @@
 import discord
+import os
+import io
+import aiohttp
 import asyncio
+from dotenv import load_dotenv
 from discord.ext import commands
+from gtts import gTTS
+from discord import FFmpegPCMAudio
 
 from bot_utilities.response_utils import split_response
 from bot_utilities.ai_utils import generate_response
 from bot_utilities.config_loader import config, load_active_channels
 from ..common import allow_dm, trigger_words, replied_messages, smart_mention, message_history, MAX_HISTORY, instructions
+
+load_dotenv ()
+ELEVEN_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID")
+ELEVEN_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
+
 
 class OnMessage(commands.Cog):
     def __init__(self, bot):
@@ -13,6 +25,21 @@ class OnMessage(commands.Cog):
         self.active_channels = load_active_channels
         self.instructions = instructions
 
+    async def eleven_tts(self, text: str) -> io.BytesIO:
+        headers = {
+            "Content-Type": "application/json",
+            "xi-api-key": ELEVEN_API_KEY
+        }
+        payload = { "text": text }
+        buf = io.BytesIO()
+        async with aiohttp.ClientSession() as session:
+            async with session.post(ELEVEN_URL, json=payload, headers=headers) as resp:
+                resp.raise_for_status()
+                data = await resp.read()
+                buf.write(data)
+            buf.seek(0)
+            return buf
+        
     async def process_message(self, message):
         active_channels = self.active_channels()
         string_channel_id = f"{message.channel.id}"
@@ -69,7 +96,7 @@ class OnMessage(commands.Cog):
     async def generate_response(self, instructions, history):
         return await generate_response(instructions=instructions, history=history)
 
-    async def send_response(self, message, response):
+    async def send_response(self, message, response: str):
         if response is not None:
             for chunk in split_response(response):
                 try:
@@ -82,6 +109,37 @@ class OnMessage(commands.Cog):
             await message.reply(
                 "I apologize for any inconvenience caused. It seems that there was an error preventing the delivery of my message."
             )
+
+        # Check if author is connected / determine voice state
+        if message.author.voice and message.guild:
+            vc = message.guild.voice_client
+            target = message.author.voice.channel
+
+            bot_connected = False
+            try:
+                # Join or move
+                if vc is None:
+                    vc = await target.connect()
+                    bot_connected = True      # we made the connection
+                elif vc.channel != target:
+                    await vc.move_to(target)
+                    bot_connected = True
+
+                # TTS playback
+                tts_buf = await self.eleven_tts(response)
+                from discord import FFmpegPCMAudio
+                source = FFmpegPCMAudio(tts_buf, pipe=True)
+                vc.play(source)
+                while vc.is_playing():
+                    await asyncio.sleep(0.5)
+
+            except Exception as e:
+                print(f"Text-to-Speech error: {e}")
+
+            finally:
+                # Only disconnect if *we* connected for this message
+                if bot_connected and vc and vc.is_connected():
+                    await vc.disconnect()
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -104,6 +162,19 @@ class OnMessage(commands.Cog):
             return
 
         await self.process_message(message)
+
+async def join_and_greet(self, message, voice_channel):
+    voice_client = await voice_channel.connect()
+    sound_path = "/home/kali/Downloads/RuckusTheme.mp3"
+
+    if os.path.isfile(sound_path):
+        audio_source = FFmpegPCMAudio(sound_path)
+        if not voice_client.is_playing():
+            voice_client.play(audio_source)
+    else:
+        print("Join sound file not found.")
+            
+    return voice_client
 
 async def setup(bot):
     await bot.add_cog(OnMessage(bot))
