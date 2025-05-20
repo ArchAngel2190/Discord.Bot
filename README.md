@@ -19,6 +19,7 @@ Designed With Linux In Mind!
  - [x] Secure Credential Management: Protect your credentials with environment variables.
  - [x] Web Access: Internet-enabled LLM to allow for current awareness.
  - [x] NEW! Voice-Enabled: The bot will check to see if the author is in a voice channel. If they are, the bot will attempt to join and speak the text using ElevenLabs API. (An ElevenLabs subscription is required for this.)
+ - [x] Slash commands - use /help for a list of all commands that are available on the bot. /enable_voice and /disable_voice can be used by people with **manage server** permissions to enable and disable the voice functions, if you do not wish to use them/pay for ElevenLabs.
 
 
 ## Additional configurations ⚙️
