@@ -11,15 +11,16 @@ Designed With Linux In Mind!
 
 <summary><strong>Features</strong></summary>
 
- - [x] Hybrid Command System: Get the best of both slash and normal commands.
- - [x] Free LLM Model: Use this powerful language model without spending anything.
- - [x] Mention Recognition: The bot will always respond when mentioned or called by name.
+ - [x] Free LLM Model: Use this powerful language model without spending anything (for text responses; voice responses require an ElevenLabs subscription).
+ - [x] Mention Recognition: The bot will always respond when mentioned or called by name, as well as when replied to using Discord's reply feature.
  - [x] Message Handling: The bot knows when you're replying to someone else, avoiding confusion.
  - [x] Channel-Specific Responses: Use the /toggleactive command to disable the bot in specific channels.
- - [x] Secure Credential Management: Protect your credentials with environment variables.
  - [x] Web Access: Internet-enabled LLM to allow for current awareness.
  - [x] NEW! Voice-Enabled: The bot will check to see if the author is in a voice channel. If they are, the bot will attempt to join and speak the text using ElevenLabs API. (An ElevenLabs subscription is required for this.)
- - [x] Slash commands - use /help for a list of all commands that are available on the bot. /enable_voice and /disable_voice can be used by people with **manage server** permissions to enable and disable the voice functions, if you do not wish to use them/pay for ElevenLabs.
+     - [x] Toggleable voice functions: /enable_voice and /disable_voice can be used by people with **manage server** permissions to enable and disable the voice functions, if you do not wish to use them/pay for ElevenLabs.
+ - [x] Slash commands: Use /help for a list of all commands that are available on the bot. 
+     - [x] Tiered slash commands: Only people with the ability to manage the guild can use the /enable_voice and /disable_voice functions
+ - [x] Consistently updated: This project is not dead! I contribute to this project regularly with updates, and is designed with Linux and security in mind.
 
 
 ## Additional configurations ⚙️
@@ -49,8 +50,8 @@ To select a Language, set the value of `"LANGUAGE"` of `config.yml` with the val
 To create a custom personality, follow these steps:
 1. Create a `.txt` file like `yourfile.txt` inside the `instructions` folder.
 2. Add the way you want the bot to act in `yourfile.txt`
-3. Open the `config.yml` file and locate [line 17](https://github.com/ArchAngel2190/TrumpBot/blob/fb3857c2db30bfe246f365ab06c96b426f7bdc0c/config.yml#L17).
-4. Set the value of INSTRUCTIONS at [line 17](https://github.com/ArchAngel2190/TrumpBot/blob/fb3857c2db30bfe246f365ab06c96b426f7bdc0c/config.yml#L17) as `"yourfile"` to specify the custom persona.
+3. Open the `config.yml` file and locate [line 17](https://github.com/ArchAngel2190/Discord.Bot/blob/fb3857c2db30bfe246f365ab06c96b426f7bdc0c/config.yml#L17).
+4. Set the value of INSTRUCTIONS at [line 17](https://github.com/ArchAngel2190/Discord.Bot/blob/fb3857c2db30bfe246f365ab06c96b426f7bdc0c/config.yml#L17) as `"yourfile"` to specify the custom persona.
 
 ⚠️ You don't explicitly need to use the name `yourfile` for persona name and set it in `config.yml`, name it whatever you want.
 
@@ -72,7 +73,7 @@ git clone https://github.com/ArchAngel2190/Discord.Bot/
 cd Discord.Bot
 ```
 ### Step 3. Install requirements
-Ensure that if have Python 3.13 or newer installed that you are operating in a virtual environment (`venv` or `pipx`) with Python 3.12 or older.
+Ensure that *if* have Python 3.13 or newer installed that you are operating in a virtual environment (`venv` or `pipx`) with Python 3.12 or older. If you have multiple versions of Python installed, use the below code except with `python3.12` as the leading.
 ```
 python3 -m pip install -r requirements.txt
 ```
