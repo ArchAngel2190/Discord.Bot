@@ -2,7 +2,7 @@
 #### Your Discord AI Companion!
 Originally made by [MishalHossin](https://github.com/mishalhossin/Discord-AI-Chatbot/) and all credit for this excellent code goes to them.
 
-### [JOIN THE DISCORD!](https://discord.gg/UCs59Dwqjw) For support with installation, to share what you've created, and to hang out with cool people.
+#### [JOIN THE DISCORD!](https://discord.gg/UCs59Dwqjw) For support with installation, to share what you've created, and to hang out with cool people.
 
 Designed With Linux In Mind!
 
