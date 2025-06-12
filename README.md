@@ -81,6 +81,11 @@ Ensure that *if* you have Python 3.13 or newer installed that you are operating 
 ```
 python3 -m pip install -r requirements.txt
 ```
+### Step 3.5. Install ffmpeg
+FFMpeg must be installed for voice functionality. This is in requirements.txt but may not install properly through that, so use the below commmand to ensure it is properly installed. (Only required on the host machine, not on that of everyone who uses it.)
+```
+sudo apt-get install ffmpeg
+```
 ### Step 4. Get your Discord bot token and **enable intents** from [HERE](https://discord.com/developers/applications)
 
 ##### Select the correct application from your Discord Developer dashboard
