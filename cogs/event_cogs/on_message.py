@@ -3,6 +3,9 @@ import os
 import io
 import aiohttp
 import asyncio
+import random
+import time
+
 from dotenv import load_dotenv
 from discord.ext import commands
 from gtts import gTTS
@@ -12,12 +15,17 @@ from bot_utilities.response_utils import split_response
 from bot_utilities.ai_utils import generate_response
 from bot_utilities.config_loader import config, load_active_channels
 from ..common import allow_dm, trigger_words, replied_messages, smart_mention, message_history, MAX_HISTORY, instructions
+from cogs.commands_cogs.voice_toggle import voice_is_enabled
+from cogs.commands_cogs.interject_toggle import interjections_enabled
 
 load_dotenv ()
 ELEVEN_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID")
 ELEVEN_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
+_interjection_timestamps = {}
+INTERJECTION_COOLDOWN = config['INTERJECTION_COOLDOWN']
+INTERJECTION_CHANCE = config['INTERJECTION_CHANCE']
 
 class OnMessage(commands.Cog):
     def __init__(self, bot):
@@ -76,7 +84,7 @@ class OnMessage(commands.Cog):
 
         # Stop typing automatically in case of error
         async def auto_stop_typing():
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
             typing_done.set()
 
         # Start the background typing task
@@ -109,6 +117,10 @@ class OnMessage(commands.Cog):
             await message.reply(
                 "I apologize for any inconvenience caused. It seems that there was an error preventing the delivery of my message."
             )
+
+        # Ensure we're in a guild and that the admin wants us speaking
+        if not message.guild or not voice_is_enabled(message.guild.id):
+            return
 
         # Check if author is connected / determine voice state
         if message.author.voice and message.guild:
@@ -160,21 +172,46 @@ class OnMessage(commands.Cog):
             message.reference and (message.reference.resolved.author != self.bot.user or message.reference.resolved.embeds)
         ):
             return
+        
+        if self.bot.user.mentioned_in(message):
+            await self.process_message(message)
+            return
+
+        # — Smart Interjection Logic —
+        guild_id = message.guild.id if message.guild else None
+        now = time.time()
+        last = _interjection_timestamps.get(guild_id, 0)
+
+        # Only if enough time has passed and random chance hits, and interjections enabled
+        if not interjections_enabled(message.guild.id):
+            if guild_id and now - last > INTERJECTION_COOLDOWN and random.random() < INTERJECTION_CHANCE:
+                # Grab the last few messages from this channel for context
+                active_channels = load_active_channels()
+                string_channel_id = str(message.channel.id)
+                instr_idx = active_channels.get(string_channel_id, config['DEFAULT_INSTRUCTION'])
+
+            # prepend the system prompt from your instructions file
+            instructions_text = (
+                "Ignore all the instructions you have gotten before. "
+                f"{instructions[instr_idx]}. "
+                "Now, having listened to the last messages, interject with a short, witty, context‑aware phrase, "
+                "then go quiet again."
+    )
+
+            # build the history just as you do for normal replies
+            history = []
+            async for msg in message.channel.history(limit=10, oldest_first=False):
+                if not msg.author.bot:
+                    history.append({"role": "user", "content": msg.content})
+                history.reverse()
+
+        # now call your normal generate_response
+        async with message.channel.typing():
+            interjection = await generate_response(instructions=instructions_text, history=history)
+        await message.channel.send(interjection)
+        _interjection_timestamps[guild_id] = now  # reset the cooldown
 
         await self.process_message(message)
-
-async def join_and_greet(self, message, voice_channel):
-    voice_client = await voice_channel.connect()
-    sound_path = "/home/kali/Downloads/RuckusTheme.mp3"
-
-    if os.path.isfile(sound_path):
-        audio_source = FFmpegPCMAudio(sound_path)
-        if not voice_client.is_playing():
-            voice_client.play(audio_source)
-    else:
-        print("Join sound file not found.")
-            
-    return voice_client
 
 async def setup(bot):
     await bot.add_cog(OnMessage(bot))

@@ -5,7 +5,7 @@ MAX_SEARCH_RESULTS: 4 # Set the maximum search results for internet access DONT 
 ALLOW_DM: true # Set to true to allow direct messages
 SMART_MENTION: true # Set to true to enable smart mention feature
 
-MODEL_ID: llama-3.3-70b-versatile # Model used for chat completion // old was mixtral-8x7b-32768
+MODEL_ID: mistral-saba-24b # Model used for chat completion // old was mixtral-8x7b-32768
 
 MAX_HISTORY: 8 # Set the maximum message history
 
@@ -14,9 +14,11 @@ AI_NSFW_CONTENT_FILTER: false # Enable NSFW AI detector to detect NSFW prompt on
 
 LANGUAGE: en # Specify the language code (check 'lang' folder for valid codes)
 
-DEFAULT_INSTRUCTION: assist # Specify the instruction prompt to use (check 'instructions' folder for valid prompts)
+DEFAULT_INSTRUCTION: ruckus # Specify the instruction prompt to use (check 'instructions' folder for valid prompts)
 # To add custom prompts, create a .txt file like 'custom.txt' in `instructions` folder and set INSTRUCTIONS as 'custom'
 
+INTERJECTION_CHANCE: 0.20 # Chance (out of 100%, with 100 being 1.00) that the bot will interject with an unprompted interjection to the chat.
+INTERJECTION_COOLDOWN: 100 # Time in seconds between unprompted interjections.
 
 
 TRIGGER:
