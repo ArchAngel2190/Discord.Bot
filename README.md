@@ -16,10 +16,12 @@ Designed With Linux In Mind!
  - [x] Message Handling: The bot knows when you're replying to someone else, avoiding confusion.
  - [x] Channel-Specific Responses: Use the /toggleactive command to disable the bot in specific channels.
  - [x] Web Access: Internet-enabled LLM to allow for current awareness.
- - [x] NEW! Voice-Enabled: The bot will check to see if the author is in a voice channel. If they are, the bot will attempt to join and speak the text using ElevenLabs API. (An ElevenLabs subscription is required for this.)
-     - [x] Toggleable voice functions: /enable_voice and /disable_voice can be used by people with **manage server** permissions to enable and disable the voice functions, if you do not wish to use them/pay for ElevenLabs.
  - [x] Slash commands: Use /help for a list of all commands that are available on the bot. 
      - [x] Tiered slash commands: Only people with the ability to manage the guild can use the /enable_voice and /disable_voice functions
+ - [x] NEW! Voice-Enabled: The bot will check to see if the author is in a voice channel. If they are, the bot will attempt to join and speak the text using ElevenLabs API. (An ElevenLabs subscription is required for this.)
+     - [x] Toggleable voice functions: /enable_voice and /disable_voice can be used by people with **manage server** permissions to enable and disable the voice functions, if you do not wish to use them/pay for ElevenLabs.
+ - [x] NEW! Interjections: If the bot hasn't been triggered in awhile, it will interject randomly in any text channel that it has permission to type in with a context-aware AI generation much the same as any other chat that the bot might normally reply with.
+     - [x] These interjection chances are adjustable within `config.yml` and are slash-command enabled, meaning you can disable them with /diable_interjections or enable them with /enable_interjections. /interjection_status will show the current status of interjections. As with other slash commands, these may only be used by users with **manage server** permissions.
  - [x] Consistently updated: This project is not dead! I contribute to this project regularly with updates, and is designed with Linux and security in mind.
 
 
@@ -53,13 +55,13 @@ To create a custom personality, follow these steps:
 3. Open the `config.yml` file and locate [line 17](https://github.com/ArchAngel2190/Discord.Bot/blob/fb3857c2db30bfe246f365ab06c96b426f7bdc0c/config.yml#L17).
 4. Set the value of INSTRUCTIONS at [line 17](https://github.com/ArchAngel2190/Discord.Bot/blob/fb3857c2db30bfe246f365ab06c96b426f7bdc0c/config.yml#L17) as `"yourfile"` to specify the custom persona.
 
-⚠️ You don't explicitly need to use the name `yourfile` for persona name and set it in `config.yml`, name it whatever you want.
+⚠️ You don't explicitly need to use the name `yourfile` for persona name and set it in `config.yml`, name it whatever you want as long as you update `config.yml` to match.
 
 # Installation
 Follow this guide in its entirety. Or don't, I'm not your real dad. If you run into problems, use the internet or ChatGPT - they are your friends and ChatGPT is actually surprisingly good at interpreting code errors if you don't know how.
 
 ## Prerequisites:
-- This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste all the below commands.
+- This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to create/modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste all the below commands.
 - This bot runs on **Python <3.13.** If you try to run this bot on Python 3.13, *it will fail and you will be confused.* This bot MUST use Python 3.12 or older. Use venv or pipx to install older python versions and make sure that to run the bot you use **python3.12 main.py** and not **python main.py.**
 
 ## Installation guide:
@@ -73,7 +75,7 @@ git clone https://github.com/ArchAngel2190/Discord.Bot/
 cd Discord.Bot
 ```
 ### Step 3. Install requirements
-Ensure that *if* have Python 3.13 or newer installed that you are operating in a virtual environment (`venv` or `pipx`) with Python 3.12 or older. If you have multiple versions of Python installed, use the below code except with `python3.12` as the leading.
+Ensure that *if* you have Python 3.13 or newer installed that you are operating in a virtual environment (`venv` or `pipx`) with Python 3.12 or older. If you have multiple versions of Python installed, use the below code except with `python3.12` as the leading.
 ```
 python3 -m pip install -r requirements.txt
 ```
@@ -100,22 +102,23 @@ ELEVENLABS_API_KEY=ELEVENLABS_TOKEN_HERE
 ELEVENLABS_VOICE_ID=VOICE_ID_HERE
 ```
 ### Step 9. Make your instructions file.
-Go to `Discord.Bot/Instructions` and create a text file that describes how you want the bot to act. Use the files inside as an example but you can do whatever you want here. This is great for making characters.
+Go to `Discord.Bot/Instructions` and create a text file that describes how you want the bot to act. Use plain English, this isn't rocket science - just tell it who it is/what to do. Use the files inside as an example but you can do basically whatever you want here. This is great for making characters.
 
 ### Step 10. 🚀 Run the bot with
 ```
 python main.py
 ```
-Ensure you use whatever Python version you have installed. If you are not using a virtual environment for older Python, you might have to use the command `pythonx.xx` in place of `python` where `x.xx` is your Python version.
+Ensure you use whatever Python version you have installed. If you are not using a virtual environment for older Python, you might have to use the command `pythonx.xx` in place of `python` where `x.xx` is your Python version. (This assumes you have that version of Python installed).
 
 #### You may need to run as admin if you are on Windows (but you shouldn't be - why do that to yourself?)
 ### Step 11. 🔗 Invite the bot 
 You can Invite your bot using the link in console, or by creating an invite link in Discord Developer's console. Inviting from the generated link allows you to use the bot without its own role.
 ![image](https://user-images.githubusercontent.com/91066601/236673317-64a1789c-f6b1-48d7-ba1b-dbb18e7d802a.png)
 
-#### There are 2 ways to talk to the AI
+#### There are 2 (and a half) ways to talk to the AI
 - Invite your bot and DM (Direct Message) it | ⚠️ Make sure you have DM enabled
-- If you want it in the server channel, use **/toggleactive** 
+- Mention (ping) or reply to the bot in any text channel that it has permission to type in.
+- If the bot has gone awhile without being pinged (default: 10mins) and a conversation is continuing in the chat without the bot, the bot will interject into the conversation with a context-aware comment.
 
 ### Using docker to run 🐳 (useful for hosting)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
