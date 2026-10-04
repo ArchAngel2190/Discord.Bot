@@ -9,7 +9,7 @@ from gtts import gTTS
 from urllib.parse import quote
 from bot_utilities.config_loader import load_current_language, config
 from openai import AsyncOpenAI
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -85,7 +85,7 @@ async def generate_response(instructions, history):
     return response_message.content
 
 async def duckduckgotool(query) -> str:
-    if config['INTERNET_ACCESS']:
+    if not config['INTERNET_ACCESS']:
         return "internet access has been disabled by user"
     blob = ''
     results = await DDGS(proxy=None).text(query, max_results=6)

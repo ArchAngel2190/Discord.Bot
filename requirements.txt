@@ -8,5 +8,5 @@ pyttsx3
 PyYAML
 Requests
 openai
-duckduckgo-search
+ddgs
 ffmpeg
