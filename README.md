@@ -60,10 +60,10 @@ To create a custom personality, follow these steps:
 ⚠️ You don't explicitly need to use the name `yourfile` for persona name and set it in `config.yml`, name it whatever you want as long as you update `config.yml` to match.
 
 # Installation
-Follow this guide in its entirety. Or don't, I'm not your real dad. If you run into problems, use the internet or ChatGPT - they are your friends and ChatGPT is actually surprisingly good at interpreting code errors if you don't know how.
+Follow this guide in its entirety. Or don't, I'm not your real dad. If you run into problems, use the internet or ChatGPT - they are your friends and ChatGPT is actually surprisingly good at interpreting code errors if you don't know how. Errors are usually displayed to you verbosely, so if you read them, they will tell you what is wrong.
 
 ## Prerequisites:
-- This installation guide and all writings on this page were designed with Linux in mind. The tutorial assumes you are using the CLI to operate. Linux was used to create/modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste all the below commands.
+- This installation guide and all writings on this page were designed with Linux in mind. **This tutorial assumes you are using the CLI to operate.** Linux was used to create/modify this bot and so all commands listed here will be in Linux format. If you are compiling/editing this bot on Windows, you may not be able to copy/paste all the below commands.
 - This bot runs on **Python <3.13.** If you try to run this bot on Python 3.13, *it will fail and you will be confused.* This bot MUST use Python 3.12 or older. Use venv or pipx to install older python versions and make sure that to run the bot you use **python3.12 main.py** and not **python main.py.**
 
 ## Installation guide:
