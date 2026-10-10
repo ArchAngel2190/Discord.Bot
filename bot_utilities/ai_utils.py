@@ -4,13 +4,20 @@ import time
 import os
 import random
 import json
+import ipaddress
+import socket
 from langdetect import detect
 from gtts import gTTS
 from urllib.parse import quote
 from bot_utilities.config_loader import load_current_language, config
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, RateLimitError
 from ddgs import DDGS
 from dotenv import load_dotenv
+from html.parser import HTMLParser
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -22,11 +29,95 @@ client = AsyncOpenAI(
     api_key=os.environ.get("API_KEY"),
 )
 
+class PageTextParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.text = []
+        self.skip_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style", "noscript", "svg"):
+            self.skip_depth += 1
+
+    def handle_endtag(self, tag):
+        if tag in ("script", "style", "noscript", "svg"):
+            self.skip_depth = max(0, self.skip_depth - 1)
+
+    def handle_data(self, data):
+        if not self.skip_depth:
+            text = data.strip()
+            if text:
+                self.text.append(text)
+
+
+async def urlread(url) -> str:
+    try:
+        parsed = urlparse(url)
+
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            return "Error: Only HTTP and HTTPS URLs are supported."
+
+        host = parsed.hostname
+
+        # Prevent access to local or private network addresses.
+        addresses = socket.getaddrinfo(host, None)
+        for address in addresses:
+            ip = ipaddress.ip_address(address[4][0])
+            if not ip.is_global:
+                return "Error: URLs pointing to private or local addresses are blocked."
+
+        request = Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; DemonstratorBot/1.0)"},
+        )
+
+        with urlopen(request, timeout=10) as response:
+            content_type = response.headers.get("Content-Type", "")
+            if "text/html" not in content_type and "text/plain" not in content_type:
+                return f"Error: Unsupported page content type: {content_type}"
+
+            raw = response.read(500_000)
+            charset = response.headers.get_content_charset() or "utf-8"
+
+        content = raw.decode(charset, errors="replace")
+
+        if "text/html" in content_type:
+            parser = PageTextParser()
+            parser.feed(content)
+            content = "\n".join(parser.text)
+
+        return content[:12000] or "No readable text found on the page."
+
+    except Exception as e:
+        return f"Unable to read webpage: {e}"
+
 async def generate_response(instructions, history):
+    now = datetime.now(ZoneInfo("America/New_York"))
+
+    current_datetime = now.strftime(
+        "%A, %B %d, %Y at %I:%M:%S %p %Z"
+    )
     messages = [
-            {"role": "system", "name": "instructions", "content": instructions},
-            *history,
-        ]
+        {
+            "role": "system",
+            "name": "instructions",
+            "content": (
+                f"{instructions}\n\n"
+                f"Current date and time: {current_datetime}\n"
+                f"Use this date and time as the reference for words such as 'today', 'tomorrow', 'yesterday', and 'tonight'. "
+                "Use the America/New_York timezone unless the user specifies another location or timezone.\n\n"
+                f"Runtime configuration:\n"
+                f"- Configured model ID: {config['MODEL_ID']}\n"
+                f"- API base URL: {config['API_BASE_URL']}\n\n"
+                "When asked which model you use, report the configured model ID "
+                "above. Do not guess, list hypothetical providers, or claim you "
+                "cannot access the configuration. Distinguish the configured model "
+                "ID from the underlying model if the provider uses aliases."
+                "Never invent tool names. Only call tools provided in the API tools list.\n"
+            ),
+        },
+        *history,
+    ]  
 
     tools = [
         {
@@ -45,56 +136,137 @@ async def generate_response(instructions, history):
                     "required": ["query"],
                 },
             },
-        }
-    ]
-    response = await client.chat.completions.create(
-        model=config['MODEL_ID'],
-        messages=messages,        
-        tools=tools,
-        tool_choice="auto",
-    )
-    response_message = response.choices[0].message
-    tool_calls = response_message.tool_calls
+        },
 
-    if tool_calls:
-        available_functions = {
-            "searchtool": duckduckgotool,
-        }
+        {
+          "type": "function",
+          "function": {
+                "name": "urlread",
+                "description": (
+                    "Fetches a public webpage and returns its readable text. "
+                    "Use this after searchtool returns a relevant URL when you "
+                    "need details that are missing from the search result snippet. "
+                    "Use the returned page content to answer the user's question. "
+                    "Do not invent page contents."
+             ),
+              "parameters": {
+                 "type": "object",
+                 "properties": {
+                     "url": {
+                          "type": "string",
+                          "description": "The full HTTP or HTTPS URL of the webpage to read.",
+                      }
+                  },
+                   "required": ["url"],
+               },
+            },
+        },
+    ]
+
+    
+    available_functions = {
+        "searchtool": duckduckgotool,
+        "urlread": urlread,
+    }
+
+    # Allow multiple rounds of tool calls before producing the final answer.
+    for round_number in range(5):
+        try:
+            response = await client.chat.completions.create(
+                model=config['MODEL_ID'],
+                messages=messages,
+                tools=tools,
+                tool_choice="auto",
+            )
+
+        except RateLimitError:
+            return (
+                "I'm being rate limited by the AI provider right now. "
+                "Please try again in a little while."
+            )
+
+        response_message = response.choices[0].message
+        tool_calls = response_message.tool_calls
+
+        # No structured tool calls means the model should be answering.
+        if not tool_calls:
+            content = response_message.content or ""
+
+            if "<tool_call>" in content or "<function=" in content:
+                return (
+                    "I couldn't complete the search because the model "
+                    "returned an invalid tool request. Please try again."
+                )
+
+            if "</think>" in content:
+                content = content.split("</think>", 1)[0]
+
+            return content.strip() or (
+                "I couldn't generate a text response. Please try again."
+            )
+
+        # Preserve the assistant's tool-call message in the conversation.
         messages.append(response_message)
 
+        # Execute every tool call returned in this round.
         for tool_call in tool_calls:
             function_name = tool_call.function.name
-            function_to_call = available_functions[function_name]
-            function_args = json.loads(tool_call.function.arguments)
-            function_response = await function_to_call(
-                query=function_args.get("query")
-            )
-            messages.append(
-                {
-                    "tool_call_id": tool_call.id,
-                    "role": "tool",
-                    "name": function_name,
-                    "content": function_response,
-                }
-            )
-        second_response = await client.chat.completions.create(
-            model=config['MODEL_ID'],
-            messages=messages
-        ) 
-        return second_response.choices[0].message.content
-    return response_message.content
+
+            function_to_call = available_functions.get(function_name)
+
+            if function_to_call is None:
+                function_response = f"Unknown tool: {function_name}"
+            else:
+                try:
+                    function_args = json.loads(
+                        tool_call.function.arguments
+                    )
+                    function_response = await function_to_call(
+                        **function_args
+                    )
+                except Exception as e:
+                    function_response = f"Tool execution failed: {e}"
+
+            messages.append({
+                "tool_call_id": tool_call.id,
+                "role": "tool",
+                "name": function_name,
+                "content": str(function_response),
+            })
+
+    return (
+        "I reached the tool-call limit before generating an answer. "
+        "Please try a more specific request."
+    )
+
 
 async def duckduckgotool(query) -> str:
     if not config['INTERNET_ACCESS']:
-        return "internet access has been disabled by user"
-    blob = ''
-    results = await DDGS(proxy=None).text(query, max_results=6)
+        return "Internet search is disabled."
+
     try:
-        for index, result in enumerate(results[:6]):  # Limiting to 6 results
-            blob += f'[{index}] Title : {result["title"]}\nSnippet : {result["body"]}\n\n\n Provide a cohesive response base on provided Search results'
+        results = DDGS(proxy=None).text(
+            query,
+            max_results=config.get('MAX_SEARCH_RESULTS', 6),
+        )
+
+        if not results:
+            return f"No search results found for: {query}"
+
+        output = [f"Search query: {query}\n"]
+
+        for i, result in enumerate(results, start=1):
+            output.append(
+                f"Result {i}\n"
+                f"Title: {result.get('title', 'No title')}\n"
+                f"URL: {result.get('href', 'No URL')}\n"
+                f"Description: {result.get('body', 'No description')}\n"
+            )
+
+        return "\n".join(output)
+
     except Exception as e:
-        blob += f"Search error: {e}\n"
-    return blob
+        return f"Search failed for '{query}': {e}"
 
 
 async def poly_image_gen(session, prompt):
